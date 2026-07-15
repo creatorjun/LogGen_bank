@@ -1,7 +1,7 @@
 # presentation/widgets/control_panel.py
 from PyQt6.QtWidgets import (
     QWidget, QHBoxLayout, QGroupBox,
-    QLabel, QLineEdit, QSpinBox, QPushButton,
+    QLabel, QLineEdit, QSpinBox, QPushButton, QButtonGroup,
 )
 from PyQt6.QtCore import pyqtSignal, Qt
 from PyQt6.QtGui import QIntValidator
@@ -15,11 +15,12 @@ class ControlPanel(QWidget):
     DEFAULT_HOST: str = "127.0.0.1"
     DEFAULT_PORT: str = "514"
     DEFAULT_OFFSET: int = 0
-    DEFAULT_INTERVAL_MS: int = 500
+    DEFAULT_INTERVAL_MS: int = 50
     MIN_INTERVAL_MS: int = 1
     MAX_INTERVAL_MS: int = 99999
     MAX_OFFSET_DAYS: int = 999
     WIDGET_HEIGHT: int = 28
+    SIGN_BTN_W: int = 36
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -44,13 +45,11 @@ class ControlPanel(QWidget):
         self._edit_host = QLineEdit(self.DEFAULT_HOST)
         self._edit_host.setFixedSize(150, self.WIDGET_HEIGHT)
         self._edit_host.setPlaceholderText("Host / IP")
-        self._edit_host.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
         self._edit_port = QLineEdit(self.DEFAULT_PORT)
         self._edit_port.setFixedSize(64, self.WIDGET_HEIGHT)
         self._edit_port.setPlaceholderText("514")
         self._edit_port.setValidator(QIntValidator(1, 65535))
-        self._edit_port.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
         lbl_host = QLabel("Host")
         lbl_host.setFixedHeight(self.WIDGET_HEIGHT)
@@ -68,11 +67,21 @@ class ControlPanel(QWidget):
         grp = QGroupBox("날짜 오프셋")
         lay = QHBoxLayout(grp)
         lay.setContentsMargins(12, 8, 12, 8)
-        lay.setSpacing(6)
+        lay.setSpacing(4)
 
-        self._btn_sign = QPushButton("+")
-        self._btn_sign.setFixedSize(32, self.WIDGET_HEIGHT)
-        self._btn_sign.setCheckable(True)
+        self._btn_plus = QPushButton("+")
+        self._btn_plus.setFixedSize(self.SIGN_BTN_W, self.WIDGET_HEIGHT)
+        self._btn_plus.setCheckable(True)
+        self._btn_plus.setChecked(True)
+
+        self._btn_minus = QPushButton("-")
+        self._btn_minus.setFixedSize(self.SIGN_BTN_W, self.WIDGET_HEIGHT)
+        self._btn_minus.setCheckable(True)
+
+        self._sign_group = QButtonGroup(self)
+        self._sign_group.setExclusive(True)
+        self._sign_group.addButton(self._btn_plus)
+        self._sign_group.addButton(self._btn_minus)
 
         self._spin_offset = QSpinBox()
         self._spin_offset.setRange(0, self.MAX_OFFSET_DAYS)
@@ -82,7 +91,9 @@ class ControlPanel(QWidget):
         lbl_day = QLabel("일")
         lbl_day.setFixedHeight(self.WIDGET_HEIGHT)
 
-        lay.addWidget(self._btn_sign)
+        lay.addWidget(self._btn_plus)
+        lay.addWidget(self._btn_minus)
+        lay.addSpacing(4)
         lay.addWidget(self._spin_offset)
         lay.addWidget(lbl_day)
         return grp
@@ -105,15 +116,11 @@ class ControlPanel(QWidget):
     def _connect(self) -> None:
         self._edit_host.editingFinished.connect(self._emit_target)
         self._edit_port.editingFinished.connect(self._emit_target)
-        self._btn_sign.toggled.connect(self._on_sign_toggled)
+        self._sign_group.buttonToggled.connect(lambda _btn, _chk: self._emit_offset())
         self._spin_offset.valueChanged.connect(self._emit_offset)
         self._spin_interval.valueChanged.connect(
             lambda v: self.interval_changed.emit(v / 1000.0)
         )
-
-    def _on_sign_toggled(self, checked: bool) -> None:
-        self._btn_sign.setText("-" if checked else "+")
-        self._emit_offset()
 
     def _emit_target(self) -> None:
         self.target_changed.emit(self._edit_host.text().strip(), self.get_port())
@@ -129,7 +136,7 @@ class ControlPanel(QWidget):
         return int(text) if text.isdigit() else 514
 
     def get_offset_sign(self) -> int:
-        return -1 if self._btn_sign.isChecked() else 1
+        return 1 if self._btn_plus.isChecked() else -1
 
     def get_offset_days(self) -> int:
         return self._spin_offset.value()

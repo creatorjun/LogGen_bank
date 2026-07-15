@@ -55,7 +55,7 @@ QSpinBox, QDoubleSpinBox {
     background-color: #FFFFFF;
     border: 1px solid #D0D0D0;
     border-radius: 4px;
-    padding: 3px 4px 3px 7px;
+    padding: 3px 7px;
     min-height: 24px;
     selection-background-color: #0078D4;
     selection-color: #FFFFFF;
@@ -70,50 +70,11 @@ QSpinBox:disabled {
     color: #A0A0A0;
 }
 
-QSpinBox::up-button, QDoubleSpinBox::up-button {
-    subcontrol-origin: border;
-    subcontrol-position: top right;
-    width: 18px;
-    border-left: 1px solid #D0D0D0;
-    border-bottom: 1px solid #D0D0D0;
-    border-top-right-radius: 4px;
-    background-color: #F8F8F8;
-}
-
-QSpinBox::up-button:hover, QDoubleSpinBox::up-button:hover {
-    background-color: #E8F2FF;
-}
-
+QSpinBox::up-button, QDoubleSpinBox::up-button,
 QSpinBox::down-button, QDoubleSpinBox::down-button {
-    subcontrol-origin: border;
-    subcontrol-position: bottom right;
-    width: 18px;
-    border-left: 1px solid #D0D0D0;
-    border-top: 1px solid #D0D0D0;
-    border-bottom-right-radius: 4px;
-    background-color: #F8F8F8;
-}
-
-QSpinBox::down-button:hover, QDoubleSpinBox::down-button:hover {
-    background-color: #E8F2FF;
-}
-
-QSpinBox::up-arrow, QDoubleSpinBox::up-arrow {
-    width: 7px;
-    height: 7px;
-    image: none;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-bottom: 5px solid #666666;
-}
-
-QSpinBox::down-arrow, QDoubleSpinBox::down-arrow {
-    width: 7px;
-    height: 7px;
-    image: none;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-top: 5px solid #666666;
+    width: 0;
+    height: 0;
+    border: none;
 }
 
 QPushButton {
@@ -142,9 +103,9 @@ QPushButton:disabled {
 }
 
 QPushButton:checked {
-    background-color: #E8F2FF;
+    background-color: #0078D4;
     border-color: #0078D4;
-    color: #0078D4;
+    color: #FFFFFF;
     font-weight: 600;
 }
 
