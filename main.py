@@ -8,8 +8,8 @@ from presentation.main_window import MainWindow
 
 
 def _app_icon() -> QIcon:
-    svg_path = Path(__file__).parent / "resources" / "icon.svg"
-    return QIcon(str(svg_path))
+    ico_path = Path(__file__).parent / "icon" / "icon.ico"
+    return QIcon(str(ico_path))
 
 
 def main() -> None:

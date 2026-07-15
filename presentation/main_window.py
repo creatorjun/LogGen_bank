@@ -22,7 +22,7 @@ class MainWindow(QMainWindow):
     WINDOW_TITLE: str = "LogGen Bank — 금융거래 TR 로그 생성기"
     WINDOW_MIN_WIDTH: int = 1000
     WINDOW_MIN_HEIGHT: int = 660
-    ICON_PATH: Path = Path(__file__).parent.parent / "resources" / "icon.svg"
+    ICON_PATH: Path = Path(__file__).parent.parent / "icon" / "icon.ico"
 
     def __init__(self) -> None:
         super().__init__()
