@@ -1,8 +1,9 @@
 # presentation/main_window.py
 import asyncio
+from pathlib import Path
 from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QSplitter
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QCloseEvent
+from PyQt6.QtGui import QCloseEvent, QIcon
 from presentation.styles.fluent import FLUENT_STYLESHEET
 from presentation.widgets.control_panel import ControlPanel
 from presentation.widgets.transmission_control import TransmissionControl
@@ -21,10 +22,12 @@ class MainWindow(QMainWindow):
     WINDOW_TITLE: str = "LogGen Bank — 금융거래 TR 로그 생성기"
     WINDOW_MIN_WIDTH: int = 1000
     WINDOW_MIN_HEIGHT: int = 660
+    ICON_PATH: Path = Path(__file__).parent.parent / "resources" / "icon.svg"
 
     def __init__(self) -> None:
         super().__init__()
         self.setStyleSheet(FLUENT_STYLESHEET)
+        self.setWindowIcon(QIcon(str(self.ICON_PATH)))
         self._persons: list[Person] = [copy.copy(p) for p in PERSONS]
         self._view_model = MainViewModel(self._persons)
         self._closing: bool = False
