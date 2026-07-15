@@ -1,8 +1,9 @@
 # application/services/transmission_loop.py
 import asyncio
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from domain.entities.person import Person
 from domain.entities.telegram_type import TelegramType
+from domain.value_objects.date_offset import DateOffset
 from application.use_cases.generate_log_use_case import GenerateLogUseCase
 from application.use_cases.send_log_use_case import SendLogUseCase
 from application.services.log_file_writer import LogFileWriter
@@ -18,7 +19,7 @@ class TransmissionStats:
 
 
 class TransmissionLoop:
-    DEFAULT_INTERVAL: float = 0.5
+    DEFAULT_INTERVAL: float = 0.05
 
     def __init__(
         self,
@@ -45,6 +46,7 @@ class TransmissionLoop:
         self._interval: float = self.DEFAULT_INTERVAL
         self._host: str = "127.0.0.1"
         self._port: int = 514
+        self._date_offset: DateOffset = DateOffset(sign=1, days=0)
 
         self._run_event = asyncio.Event()
         self._task: asyncio.Task | None = None
@@ -64,6 +66,9 @@ class TransmissionLoop:
     def set_target(self, host: str, port: int) -> None:
         self._host = host
         self._port = port
+
+    def set_date_offset(self, sign: int, days: int) -> None:
+        self._date_offset = DateOffset(sign=sign, days=days)
 
     def start(self) -> None:
         self._run_event.set()
@@ -113,7 +118,6 @@ class TransmissionLoop:
                     self._on_log_generated(raw_log, success)
             except Exception:
                 self._stats.failed += 1
-                success = False
                 if self._on_log_generated:
                     self._on_log_generated("", False)
 
