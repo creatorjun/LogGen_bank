@@ -21,9 +21,7 @@ class LogCommonBody:
     bank_cod_3: str
     resv: str
 
-    FIELD_LENGTHS: tuple = (
-        9, 8, 2, 4, 3, 1, 6, 8, 6, 4, 4, 8, 6, 15, 3, 13
-    )
+    FIELD_LENGTHS: tuple = (9, 8, 2, 4, 3, 1, 6, 8, 6, 4, 4, 8, 6, 15, 3, 13)
     RECORD_END: str = "]"
 
     def to_raw(self) -> str:
@@ -34,6 +32,6 @@ class LogCommonBody:
             self.inq_num, self.bank_tlgrm_num, self.bank_cod_3, self.resv,
         ]
         raw = "".join(
-            v.ljust(l) for v, l in zip(values, self.FIELD_LENGTHS)
+            v.ljust(length) for v, length in zip(values, self.FIELD_LENGTHS)
         )
         return raw + self.RECORD_END

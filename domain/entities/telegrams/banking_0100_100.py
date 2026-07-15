@@ -36,6 +36,6 @@ class Banking0100100Body:
             self.dps_bank_cod_3, self.resv2,
         ]
         raw = "".join(
-            v.ljust(l) for v, l in zip(values, self.FIELD_LENGTHS)
+            v.ljust(length) for v, length in zip(values, self.FIELD_LENGTHS)
         )
         return raw + self.RECORD_END

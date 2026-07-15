@@ -17,9 +17,7 @@ class Banking0600400Body:
     hngl_use_inf: str
     conn_bank_resv: str
 
-    FIELD_LENGTHS: tuple = (
-        4, 2, 15, 22, 13, 2, 20, 3, 20, 20, 1, 4
-    )
+    FIELD_LENGTHS: tuple = (4, 2, 15, 22, 13, 2, 20, 3, 20, 20, 1, 4)
     RECORD_END: str = "@@"
 
     def to_raw(self) -> str:
@@ -30,6 +28,6 @@ class Banking0600400Body:
             self.hngl_use_inf, self.conn_bank_resv,
         ]
         raw = "".join(
-            v.ljust(l) for v, l in zip(values, self.FIELD_LENGTHS)
+            v.ljust(length) for v, length in zip(values, self.FIELD_LENGTHS)
         )
         return raw + self.RECORD_END
