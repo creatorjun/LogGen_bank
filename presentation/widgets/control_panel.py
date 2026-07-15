@@ -1,86 +1,114 @@
 # presentation/widgets/control_panel.py
 from PyQt6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QGroupBox,
-    QLabel, QLineEdit, QComboBox, QPushButton, QFormLayout,
+    QLabel, QLineEdit, QSpinBox, QPushButton,
 )
 from PyQt6.QtCore import pyqtSignal
-from domain.entities.telegram_type import TelegramType
 
 
 class ControlPanel(QWidget):
-    generate_requested = pyqtSignal(str, dict)
-    send_requested = pyqtSignal(str, int)
+    target_changed = pyqtSignal(str, int)
+    offset_changed = pyqtSignal(int, int)
+    interval_changed = pyqtSignal(float)
+
+    DEFAULT_HOST: str = "127.0.0.1"
+    DEFAULT_PORT: int = 514
+    DEFAULT_OFFSET: int = 0
+    DEFAULT_INTERVAL_MS: int = 500
+    MIN_INTERVAL_MS: int = 1
+    MAX_INTERVAL_MS: int = 99999
+    MAX_OFFSET_DAYS: int = 999
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        self._init_ui()
+        self._build_ui()
+        self._connect()
 
-    def _init_ui(self) -> None:
-        root_layout = QVBoxLayout(self)
-        root_layout.setContentsMargins(0, 0, 0, 0)
+    def _build_ui(self) -> None:
+        root = QHBoxLayout(self)
+        root.setContentsMargins(0, 0, 0, 0)
+        root.setSpacing(8)
 
-        root_layout.addWidget(self._build_header_group())
-        root_layout.addWidget(self._build_network_group())
-        root_layout.addWidget(self._build_action_group())
+        root.addWidget(self._make_target_group())
+        root.addWidget(self._make_offset_group())
+        root.addWidget(self._make_interval_group())
 
-    def _build_header_group(self) -> QGroupBox:
-        group = QGroupBox("헤더 / 전문 설정")
-        form = QFormLayout(group)
+    def _make_target_group(self) -> QGroupBox:
+        grp = QGroupBox("전송 대상")
+        lay = QHBoxLayout(grp)
+        lay.setSpacing(6)
+        self._edit_host = QLineEdit(self.DEFAULT_HOST)
+        self._edit_host.setFixedWidth(140)
+        self._edit_host.setPlaceholderText("Host / IP")
+        self._spin_port = QSpinBox()
+        self._spin_port.setRange(1, 65535)
+        self._spin_port.setValue(self.DEFAULT_PORT)
+        self._spin_port.setFixedWidth(72)
+        lay.addWidget(QLabel("Host"))
+        lay.addWidget(self._edit_host)
+        lay.addWidget(QLabel("Port"))
+        lay.addWidget(self._spin_port)
+        return grp
 
-        self._combo_type = QComboBox()
-        for t in TelegramType:
-            self._combo_type.addItem(t.value, t.value)
-        form.addRow(QLabel("전문 타입:"), self._combo_type)
+    def _make_offset_group(self) -> QGroupBox:
+        grp = QGroupBox("날짜 오프셋")
+        lay = QHBoxLayout(grp)
+        lay.setSpacing(6)
+        self._btn_sign = QPushButton("+")
+        self._btn_sign.setFixedWidth(32)
+        self._btn_sign.setCheckable(True)
+        self._spin_offset = QSpinBox()
+        self._spin_offset.setRange(0, self.MAX_OFFSET_DAYS)
+        self._spin_offset.setValue(self.DEFAULT_OFFSET)
+        self._spin_offset.setFixedWidth(60)
+        lay.addWidget(self._btn_sign)
+        lay.addWidget(self._spin_offset)
+        lay.addWidget(QLabel("일"))
+        return grp
 
-        self._edit_log_pk = QLineEdit("00603REN001    ")
-        self._edit_server_id = QLineEdit("211.168.15.3        ")
-        self._edit_instance_id = QLineEdit("542EE       ")
-        self._edit_sr_type = QLineEdit("MB   ")
+    def _make_interval_group(self) -> QGroupBox:
+        grp = QGroupBox("전송 간격")
+        lay = QHBoxLayout(grp)
+        lay.setSpacing(6)
+        self._spin_interval = QSpinBox()
+        self._spin_interval.setRange(self.MIN_INTERVAL_MS, self.MAX_INTERVAL_MS)
+        self._spin_interval.setValue(self.DEFAULT_INTERVAL_MS)
+        self._spin_interval.setSuffix(" ms")
+        self._spin_interval.setFixedWidth(90)
+        lay.addWidget(self._spin_interval)
+        return grp
 
-        form.addRow(QLabel("Log PK (15):"), self._edit_log_pk)
-        form.addRow(QLabel("Server ID (20):"), self._edit_server_id)
-        form.addRow(QLabel("Instance ID (12):"), self._edit_instance_id)
-        form.addRow(QLabel("SR Type (5):"), self._edit_sr_type)
-        return group
+    def _connect(self) -> None:
+        self._edit_host.editingFinished.connect(self._emit_target)
+        self._spin_port.valueChanged.connect(self._emit_target)
+        self._btn_sign.toggled.connect(self._emit_offset)
+        self._spin_offset.valueChanged.connect(self._emit_offset)
+        self._spin_interval.valueChanged.connect(
+            lambda v: self.interval_changed.emit(v / 1000.0)
+        )
 
-    def _build_network_group(self) -> QGroupBox:
-        group = QGroupBox("전송 설정")
-        layout = QHBoxLayout(group)
+    def _emit_target(self) -> None:
+        self.target_changed.emit(self._edit_host.text().strip(), self._spin_port.value())
 
-        self._edit_host = QLineEdit("127.0.0.1")
-        self._edit_port = QLineEdit("9000")
+    def _emit_offset(self) -> None:
+        sign = -1 if self._btn_sign.isChecked() else 1
+        if self._btn_sign.isChecked():
+            self._btn_sign.setText("-")
+        else:
+            self._btn_sign.setText("+")
+        self.offset_changed.emit(sign, self._spin_offset.value())
 
-        layout.addWidget(QLabel("Host:"))
-        layout.addWidget(self._edit_host)
-        layout.addWidget(QLabel("Port:"))
-        layout.addWidget(self._edit_port)
-        return group
+    def get_host(self) -> str:
+        return self._edit_host.text().strip()
 
-    def _build_action_group(self) -> QGroupBox:
-        group = QGroupBox("액션")
-        layout = QHBoxLayout(group)
+    def get_port(self) -> int:
+        return self._spin_port.value()
 
-        btn_generate = QPushButton("로그 생성")
-        btn_send = QPushButton("로그 전송")
-        btn_generate.clicked.connect(self._on_generate_clicked)
-        btn_send.clicked.connect(self._on_send_clicked)
+    def get_offset_sign(self) -> int:
+        return -1 if self._btn_sign.isChecked() else 1
 
-        layout.addWidget(btn_generate)
-        layout.addWidget(btn_send)
-        return group
+    def get_offset_days(self) -> int:
+        return self._spin_offset.value()
 
-    def _on_generate_clicked(self) -> None:
-        params = {
-            "log_pk": self._edit_log_pk.text(),
-            "server_id": self._edit_server_id.text(),
-            "instance_id": self._edit_instance_id.text(),
-            "sr_type": self._edit_sr_type.text(),
-        }
-        self.generate_requested.emit(self._combo_type.currentData(), params)
-
-    def _on_send_clicked(self) -> None:
-        try:
-            port = int(self._edit_port.text())
-        except ValueError:
-            port = 9000
-        self.send_requested.emit(self._edit_host.text(), port)
+    def get_interval_seconds(self) -> float:
+        return self._spin_interval.value() / 1000.0

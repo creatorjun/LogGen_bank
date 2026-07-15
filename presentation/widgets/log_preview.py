@@ -1,33 +1,46 @@
 # presentation/widgets/log_preview.py
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QGroupBox, QTextEdit, QLabel
-from PyQt6.QtGui import QFont
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QTextEdit, QLabel
+from PyQt6.QtCore import Qt
 
 
 class LogPreview(QWidget):
-    FONT_FAMILY: str = "Courier New"
-    FONT_SIZE: int = 10
+    MAX_LINES: int = 500
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        self._init_ui()
+        self._build_ui()
 
-    def _init_ui(self) -> None:
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
+    def _build_ui(self) -> None:
+        lay = QVBoxLayout(self)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.setSpacing(4)
 
-        group = QGroupBox("생성된 로그 미리보기")
-        inner = QVBoxLayout(group)
+        self._lbl_count = QLabel("0 건")
+        self._lbl_count.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self._text_edit = QTextEdit()
         self._text_edit.setReadOnly(True)
-        self._text_edit.setFont(QFont(self.FONT_FAMILY, self.FONT_SIZE))
-        self._label_length = QLabel("Byte 길이: 0")
+        self._text_edit.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap)
 
-        inner.addWidget(self._text_edit)
-        inner.addWidget(self._label_length)
-        layout.addWidget(group)
+        lay.addWidget(self._lbl_count)
+        lay.addWidget(self._text_edit, stretch=1)
 
-    def set_log(self, raw_log: str) -> None:
-        self._text_edit.setPlainText(raw_log)
-        byte_len = len(raw_log.encode("euc-kr", errors="replace"))
-        self._label_length.setText(f"Byte 길이: {byte_len}")
+        self._lines: list[str] = []
+
+    def append_log(self, raw_log: str, success: bool) -> None:
+        prefix = "[OK] " if success else "[ERR]"
+        self._lines.append(f"{prefix} {raw_log}")
+        if len(self._lines) > self.MAX_LINES:
+            self._lines.clear()
+            self._text_edit.clear()
+
+        self._text_edit.append(f"{prefix} {raw_log}")
+        self._lbl_count.setText(f"{len(self._lines)} 건")
+
+    def get_all_text(self) -> str:
+        return self._text_edit.toPlainText()
+
+    def clear(self) -> None:
+        self._lines.clear()
+        self._text_edit.clear()
+        self._lbl_count.setText("0 건")
