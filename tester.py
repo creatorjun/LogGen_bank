@@ -5,7 +5,7 @@ import datetime
 HOST: str = "0.0.0.0"
 PORT: int = 514
 BUFFER: int = 65535
-ENCODING: str = "utf-8"
+ENCODING: str = "euc-kr"
 
 
 def main() -> None:
