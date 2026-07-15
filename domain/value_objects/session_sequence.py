@@ -23,7 +23,7 @@ class SessionSequence:
         self._inq_num += 1
         if self._inq_num > MAX_INQ:
             self._inq_num = 1
-        return str(self._inq_num).zfill(9)
+        return str(self._inq_num).zfill(6)
 
     def next_tid_seq(self) -> str:
         self._tid_seq += 1

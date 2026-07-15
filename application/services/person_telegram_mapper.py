@@ -14,7 +14,7 @@ from domain.value_objects.session_sequence import SessionSequence
 
 
 class PersonTelegramMapper:
-    TRSM_NUMTM: str = "1"
+    TRSM_NUMTM: str = "y"
     RESP_COD: str = "    "
     RESV_BANKING: str = "             "
     SR_TYPE_MB: str = "MB"
@@ -70,14 +70,13 @@ class PersonTelegramMapper:
         telegram_id: str,
         sr_type: str,
     ) -> LogHeader:
-        unique_key = person.bank_cod + ctx["log_pk_seq"]
         return LogHeader(
             log_pk=person.log_pk + ctx["log_pk_seq"],
             server_id=person.server_id,
             instance_id=person.instance_id,
             log_date=ctx["yyyymmdd"],
             log_time=ctx["hhmmss"],
-            unique_key=unique_key,
+            unique_key=person.bank_cod,
             telegram_id=telegram_id,
             sr_type=sr_type,
         )

@@ -21,17 +21,23 @@ class LogCommonBody:
     bank_cod_3: str
     resv: str
 
-    FIELD_LENGTHS: tuple = (9, 8, 2, 4, 3, 1, 6, 8, 6, 4, 4, 8, 6, 15, 3, 13)
-    RECORD_END: str = "]"
-
     def to_raw(self) -> str:
-        values = [
-            self.dsc_cod, self.entr_cod, self.bank_cod, self.msg_cod,
-            self.bz_sctn, self.trsm_numtm, self.tlgrm_num, self.trms_ymd,
-            self.trms_hms, self.resp_cod, self.bank_resp_cod, self.inq_ymd,
-            self.inq_num, self.bank_tlgrm_num, self.bank_cod_3, self.resv,
-        ]
-        raw = "".join(
-            v.ljust(length) for v, length in zip(values, self.FIELD_LENGTHS)
+        return (
+            self.dsc_cod.ljust(9)
+            + self.entr_cod.ljust(8)
+            + self.bank_cod.ljust(2)
+            + self.msg_cod.ljust(4)
+            + self.bz_sctn.ljust(3)
+            + self.trsm_numtm[:1]
+            + self.tlgrm_num.zfill(6)
+            + self.trms_ymd
+            + self.trms_hms
+            + self.resp_cod.ljust(4)
+            + self.bank_resp_cod.ljust(4)
+            + self.inq_ymd
+            + self.inq_num.zfill(6)
+            + self.bank_tlgrm_num.ljust(15)
+            + self.bank_cod_3.ljust(3)
+            + self.resv.ljust(13)
+            + "]"
         )
-        return raw + self.RECORD_END
