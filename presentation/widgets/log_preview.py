@@ -31,8 +31,8 @@ class LogPreview(QWidget):
             self._text_edit.clear()
             self._line_count = 0
 
-        prefix = "[OK] " if success else "[ERR]"
-        self._text_edit.append(f"{prefix} {raw_log}")
+        line = f"[ERR] {raw_log}" if not success else raw_log
+        self._text_edit.append(line)
         self._line_count += 1
         self._lbl_count.setText(f"{self._line_count} 건")
 
