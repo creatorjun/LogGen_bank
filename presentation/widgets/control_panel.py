@@ -20,8 +20,8 @@ class ControlPanel(QWidget):
     MAX_INTERVAL_MS: int = 99999
     MAX_OFFSET_DAYS: int = 999
     WIDGET_HEIGHT: int = 28
-    SIGN_BTN_W: int = 26
-    SIGN_BTN_H: int = 24
+    SIGN_BTN_W: int = 28
+    SIGN_BTN_H: int = 28
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -60,16 +60,18 @@ class ControlPanel(QWidget):
         self._edit_port.setPlaceholderText("514")
         self._edit_port.setValidator(QIntValidator(1, 65535))
 
-        for lbl_text, widget in [("전송 대상", None), ("Host", self._edit_host), ("Port", self._edit_port)]:
-            if lbl_text == "전송 대상":
-                continue
-            lbl = QLabel(lbl_text)
-            lbl.setFixedHeight(self.WIDGET_HEIGHT)
-            lbl.setAlignment(Qt.AlignmentFlag.AlignVCenter)
-            lay.addWidget(lbl)
-            lay.addWidget(widget)
-            if lbl_text == "Host":
-                lay.addSpacing(4)
+        lbl_host = QLabel("Host")
+        lbl_host.setFixedHeight(self.WIDGET_HEIGHT)
+        lbl_host.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+        lbl_port = QLabel("Port")
+        lbl_port.setFixedHeight(self.WIDGET_HEIGHT)
+        lbl_port.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+
+        lay.addWidget(lbl_host)
+        lay.addWidget(self._edit_host)
+        lay.addSpacing(4)
+        lay.addWidget(lbl_port)
+        lay.addWidget(self._edit_port)
         return grp
 
     def _make_offset_group(self) -> QGroupBox:
@@ -80,12 +82,14 @@ class ControlPanel(QWidget):
         lay.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
         self._btn_plus = QPushButton("+")
+        self._btn_plus.setObjectName("btn_sign")
         self._btn_plus.setFixedSize(self.SIGN_BTN_W, self.SIGN_BTN_H)
         self._btn_plus.setFont(self._sign_font())
         self._btn_plus.setCheckable(True)
         self._btn_plus.setChecked(True)
 
         self._btn_minus = QPushButton("-")
+        self._btn_minus.setObjectName("btn_sign")
         self._btn_minus.setFixedSize(self.SIGN_BTN_W, self.SIGN_BTN_H)
         self._btn_minus.setFont(self._sign_font())
         self._btn_minus.setCheckable(True)

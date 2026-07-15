@@ -109,6 +109,33 @@ QPushButton:checked {
     font-weight: 600;
 }
 
+QPushButton#btn_sign {
+    padding: 0px;
+    min-height: 0px;
+    border-radius: 4px;
+    background-color: #FFFFFF;
+    border: 1px solid #D0D0D0;
+    color: #1A1A1A;
+}
+
+QPushButton#btn_sign:hover {
+    background-color: #F0F6FF;
+    border-color: #0078D4;
+    color: #0078D4;
+}
+
+QPushButton#btn_sign:checked {
+    background-color: #0078D4;
+    border-color: #0078D4;
+    color: #FFFFFF;
+}
+
+QPushButton#btn_sign:!checked {
+    background-color: #FFFFFF;
+    border-color: #D0D0D0;
+    color: #1A1A1A;
+}
+
 QPushButton#btn_start {
     background-color: #0078D4;
     color: #FFFFFF;
