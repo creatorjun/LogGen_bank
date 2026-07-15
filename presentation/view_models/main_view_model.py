@@ -3,6 +3,8 @@ import asyncio
 from PyQt6.QtCore import QObject, pyqtSignal
 from domain.entities.person import Person
 from domain.entities.telegram_type import TelegramType
+from domain.value_objects.session_sequence import SessionSequence
+from domain.value_objects.date_offset import DateOffset
 from application.services.transmission_loop import TransmissionLoop, TransmissionStats
 from application.services.log_file_writer import LogFileWriter
 from application.use_cases.generate_log_use_case import GenerateLogUseCase
@@ -26,12 +28,14 @@ class MainViewModel(QObject):
         self._persons = persons
         self._host: str = "127.0.0.1"
         self._port: int = 514
+        self._date_offset: DateOffset = DateOffset(sign=1, days=0)
         self._state: str = self.STATE_IDLE
         self._loop: TransmissionLoop | None = None
         self._build_loop()
 
     def _build_loop(self) -> None:
-        mapper = PersonTelegramMapper()
+        sequence = SessionSequence()
+        mapper = PersonTelegramMapper(sequence=sequence, date_offset=self._date_offset)
         generate_uc = GenerateLogUseCase(mapper)
         send_uc = SendLogUseCase(UdpSender())
         writer = LogFileWriter()
@@ -81,6 +85,7 @@ class MainViewModel(QObject):
             self._loop.set_interval(seconds)
 
     def set_date_offset(self, sign: int, days: int) -> None:
+        self._date_offset = DateOffset(sign=sign, days=days)
         if self._loop:
             self._loop.set_date_offset(sign, days)
 
