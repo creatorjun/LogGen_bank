@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (
     QLabel, QLineEdit, QSpinBox, QPushButton, QButtonGroup,
 )
 from PyQt6.QtCore import pyqtSignal, Qt
-from PyQt6.QtGui import QIntValidator
+from PyQt6.QtGui import QIntValidator, QFont
 
 
 class ControlPanel(QWidget):
@@ -20,12 +20,19 @@ class ControlPanel(QWidget):
     MAX_INTERVAL_MS: int = 99999
     MAX_OFFSET_DAYS: int = 999
     WIDGET_HEIGHT: int = 28
-    SIGN_BTN_W: int = 34
+    SIGN_BTN_W: int = 26
+    SIGN_BTN_H: int = 24
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._build_ui()
         self._connect()
+
+    def _sign_font(self) -> QFont:
+        f = QFont()
+        f.setBold(True)
+        f.setPointSize(11)
+        return f
 
     def _build_ui(self) -> None:
         root = QHBoxLayout(self)
@@ -53,7 +60,9 @@ class ControlPanel(QWidget):
         self._edit_port.setPlaceholderText("514")
         self._edit_port.setValidator(QIntValidator(1, 65535))
 
-        for lbl_text, widget in [("Host", self._edit_host), ("Port", self._edit_port)]:
+        for lbl_text, widget in [("전송 대상", None), ("Host", self._edit_host), ("Port", self._edit_port)]:
+            if lbl_text == "전송 대상":
+                continue
             lbl = QLabel(lbl_text)
             lbl.setFixedHeight(self.WIDGET_HEIGHT)
             lbl.setAlignment(Qt.AlignmentFlag.AlignVCenter)
@@ -71,12 +80,14 @@ class ControlPanel(QWidget):
         lay.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
         self._btn_plus = QPushButton("+")
-        self._btn_plus.setFixedSize(self.SIGN_BTN_W, self.WIDGET_HEIGHT)
+        self._btn_plus.setFixedSize(self.SIGN_BTN_W, self.SIGN_BTN_H)
+        self._btn_plus.setFont(self._sign_font())
         self._btn_plus.setCheckable(True)
         self._btn_plus.setChecked(True)
 
         self._btn_minus = QPushButton("-")
-        self._btn_minus.setFixedSize(self.SIGN_BTN_W, self.WIDGET_HEIGHT)
+        self._btn_minus.setFixedSize(self.SIGN_BTN_W, self.SIGN_BTN_H)
+        self._btn_minus.setFont(self._sign_font())
         self._btn_minus.setCheckable(True)
 
         self._sign_group = QButtonGroup(self)
