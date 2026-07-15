@@ -3,12 +3,20 @@ import asyncio
 from domain.ports.log_sender_port import LogSenderPort
 
 
+class _UdpProtocol(asyncio.DatagramProtocol):
+    def error_received(self, exc: Exception) -> None:
+        pass
+
+    def connection_lost(self, exc: Exception | None) -> None:
+        pass
+
+
 class UdpSender(LogSenderPort):
     async def send(self, host: str, port: int, payload: bytes) -> bool:
         try:
             loop = asyncio.get_running_loop()
             transport, _ = await loop.create_datagram_endpoint(
-                asyncio.DatagramProtocol,
+                _UdpProtocol,
                 remote_addr=(host, port),
             )
             try:
