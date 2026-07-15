@@ -19,14 +19,15 @@ loggen_bank/
 ├── domain/                     # 순수 비즈니스 규칙, 외부 의존성 Zero
 │   ├── entities/
 │   │   ├── log_header.py           # 헤더 고정 포맷 엔티티
-│   │   ├── log_common_body.py      # 공통부 포맷 엔티티
+│   │   ├── log_common_body.py      # 뽅킹(A1) 전용 공통부 101byte
+│   │   ├── card_common_body.py     # 카드(C3) 전용 공통부 57byte [신규]
 │   │   ├── telegram_type.py        # 전문 타입 StrEnum (4종)
 │   │   ├── person.py               # Person 마스터 데이터 엔티티
 │   │   └── telegrams/
-│   │       ├── banking_0100_100.py # 실시간송금   개별부
-│   │       ├── banking_0400_100.py # 타행이체불능 개별부
-│   │       ├── banking_0600_400.py # 성명조회     개별부
-│   │       └── card_nit_0200.py    # 카드승인인증 공통부+개별부
+│   │       ├── banking_0100_100.py # 실시간송금   개별부 202byte
+│   │       ├── banking_0400_100.py # 타행이체불능 개별부 116byte
+│   │       ├── banking_0600_400.py # 성명조회     개별부 128byte
+│   │       └── card_nit_0200.py    # 카드승인인증 개별부
 │   ├── value_objects/
 │   │   ├── date_offset.py          # 날짜 오프셋 Value Object
 │   │   └── session_sequence.py     # 세션 단위 증가형 시퀀스 토큰 공급자
@@ -58,9 +59,9 @@ loggen_bank/
     ├── view_models/
     │   └── main_view_model.py      # pyqtSignal, async 브릿지
     └── widgets/
-        ├── control_panel.py        # 전문타입 / 날짜오프셋 / 전송설정 입력
+        ├── control_panel.py        # 전송 대상(Host/Port) / 날짜오프셋 / 전송간격 입력
         ├── log_preview.py          # 생성 로그 미리보기 (최근 500건)
-        ├── transmission_control.py # 전송/중지 토글 버튼 + 간격 설정
+        ├── transmission_control.py # 전송/중지 토글 버튼 + 전송간격 설정
         ├── stats_panel.py          # Person/케이스/건수/실패수 실시간 표시
         └── status_bar.py           # 전송 결과 색상 상태바
 ```
@@ -70,15 +71,15 @@ loggen_bank/
 ## 로그 포맷 구조
 
 ```
-[헤더(83)] [공통부(101)] 개별부(가변) @@
+[헤더(83)] [공통부] 개별부(가변) @@
 ```
 
-| 전문 ID | 헤더 | 공통부 | 개별부 | 종료 |
-|---|---|---|---|---|
-| A1-0100-100 (실시간송금) | 83 | 101 | 202 | `@@` |
-| A1-0400-100 (타행이체불능) | 83 | 101 | 116 | `@@` |
-| A1-0600-400 (성명조회) | 83 | 101 | 128 | `@@` |
-| C3-NIT-0200 (카드승인) | 83 | 공통부 별도 | 가변 | `@@` |
+| 전문 ID | 헤더 | 공통부 | 개별부 | 공통부 클래스 | 종료 |
+|---|---|---|---|---|---|
+| A1-0100-100 (실시간송금) | 83 | 101 | 202 | `LogCommonBody` | `@@` |
+| A1-0400-100 (타행이체불능) | 83 | 101 | 116 | `LogCommonBody` | `@@` |
+| A1-0600-400 (성명조회) | 83 | 101 | 128 | `LogCommonBody` | `@@` |
+| C3-NIT-0200 (카드승인) | 83 | 57 | 가변 | `CardCommonBody` | `@@` |
 
 - 헤더 시작: `[`, 헤더 식별자(공통부 구분): `/`
 - 공통부 종료: `]`
