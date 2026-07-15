@@ -3,7 +3,7 @@ from domain.ports.log_sender_port import LogSenderPort
 
 
 class SendLogUseCase:
-    ENCODING: str = "euc-kr"
+    ENCODING: str = "utf-8"
 
     def __init__(self, sender: LogSenderPort) -> None:
         self._sender = sender
