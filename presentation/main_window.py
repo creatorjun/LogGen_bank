@@ -1,13 +1,17 @@
 # presentation/main_window.py
-from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QSplitter
+from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QSplitter
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QCloseEvent, QGuiApplication
+from PyQt6.QtGui import QCloseEvent
 from presentation.styles.fluent import FLUENT_STYLESHEET
 from presentation.widgets.control_panel import ControlPanel
 from presentation.widgets.transmission_control import TransmissionControl
 from presentation.widgets.log_preview import LogPreview
 from presentation.widgets.stats_panel import StatsPanel
 from presentation.widgets.status_bar import AppStatusBar
+from presentation.widgets.person_editor_dialog import PersonEditorDialog
+from infrastructure.data.person_fixture import PERSONS
+from domain.entities.person import Person
+import copy
 
 
 class MainWindow(QMainWindow):
@@ -18,7 +22,9 @@ class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.setStyleSheet(FLUENT_STYLESHEET)
+        self._persons: list[Person] = [copy.copy(p) for p in PERSONS]
         self._build_ui()
+        self._connect_signals()
 
     def _build_ui(self) -> None:
         self.setWindowTitle(self.WINDOW_TITLE)
@@ -48,6 +54,17 @@ class MainWindow(QMainWindow):
         self.setStatusBar(self._status_bar)
         self.setCentralWidget(central)
 
+    def _connect_signals(self) -> None:
+        self._tx_control.person_edit_requested.connect(self._open_person_editor)
+
+    def _open_person_editor(self) -> None:
+        dlg = PersonEditorDialog(self._persons, parent=self)
+        dlg.persons_updated.connect(self._on_persons_updated)
+        dlg.exec()
+
+    def _on_persons_updated(self, persons: list[Person]) -> None:
+        self._persons = persons
+
     def closeEvent(self, event: QCloseEvent) -> None:
         event.accept()
 
@@ -70,3 +87,7 @@ class MainWindow(QMainWindow):
     @property
     def status_bar_widget(self) -> AppStatusBar:
         return self._status_bar
+
+    @property
+    def persons(self) -> list[Person]:
+        return self._persons

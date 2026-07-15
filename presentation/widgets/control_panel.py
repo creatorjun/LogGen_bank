@@ -20,7 +20,7 @@ class ControlPanel(QWidget):
     MAX_INTERVAL_MS: int = 99999
     MAX_OFFSET_DAYS: int = 999
     WIDGET_HEIGHT: int = 28
-    SIGN_BTN_W: int = 36
+    SIGN_BTN_W: int = 34
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -31,6 +31,7 @@ class ControlPanel(QWidget):
         root = QHBoxLayout(self)
         root.setContentsMargins(0, 0, 0, 0)
         root.setSpacing(8)
+        root.setAlignment(Qt.AlignmentFlag.AlignVCenter)
         root.addWidget(self._make_target_group())
         root.addWidget(self._make_offset_group())
         root.addWidget(self._make_interval_group())
@@ -41,6 +42,7 @@ class ControlPanel(QWidget):
         lay = QHBoxLayout(grp)
         lay.setContentsMargins(12, 8, 12, 8)
         lay.setSpacing(8)
+        lay.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
         self._edit_host = QLineEdit(self.DEFAULT_HOST)
         self._edit_host.setFixedSize(150, self.WIDGET_HEIGHT)
@@ -51,16 +53,14 @@ class ControlPanel(QWidget):
         self._edit_port.setPlaceholderText("514")
         self._edit_port.setValidator(QIntValidator(1, 65535))
 
-        lbl_host = QLabel("Host")
-        lbl_host.setFixedHeight(self.WIDGET_HEIGHT)
-        lbl_port = QLabel("Port")
-        lbl_port.setFixedHeight(self.WIDGET_HEIGHT)
-
-        lay.addWidget(lbl_host)
-        lay.addWidget(self._edit_host)
-        lay.addSpacing(4)
-        lay.addWidget(lbl_port)
-        lay.addWidget(self._edit_port)
+        for lbl_text, widget in [("Host", self._edit_host), ("Port", self._edit_port)]:
+            lbl = QLabel(lbl_text)
+            lbl.setFixedHeight(self.WIDGET_HEIGHT)
+            lbl.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+            lay.addWidget(lbl)
+            lay.addWidget(widget)
+            if lbl_text == "Host":
+                lay.addSpacing(4)
         return grp
 
     def _make_offset_group(self) -> QGroupBox:
@@ -68,6 +68,7 @@ class ControlPanel(QWidget):
         lay = QHBoxLayout(grp)
         lay.setContentsMargins(12, 8, 12, 8)
         lay.setSpacing(4)
+        lay.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
         self._btn_plus = QPushButton("+")
         self._btn_plus.setFixedSize(self.SIGN_BTN_W, self.WIDGET_HEIGHT)
@@ -90,6 +91,7 @@ class ControlPanel(QWidget):
 
         lbl_day = QLabel("일")
         lbl_day.setFixedHeight(self.WIDGET_HEIGHT)
+        lbl_day.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
         lay.addWidget(self._btn_plus)
         lay.addWidget(self._btn_minus)
@@ -103,6 +105,7 @@ class ControlPanel(QWidget):
         lay = QHBoxLayout(grp)
         lay.setContentsMargins(12, 8, 12, 8)
         lay.setSpacing(6)
+        lay.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
         self._spin_interval = QSpinBox()
         self._spin_interval.setRange(self.MIN_INTERVAL_MS, self.MAX_INTERVAL_MS)
