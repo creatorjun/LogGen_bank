@@ -19,6 +19,11 @@ class TcpSender(LogSenderPort):
                 return True
             finally:
                 writer.close()
-                await writer.wait_closed()
+                try:
+                    await writer.wait_closed()
+                except Exception:
+                    pass
         except (asyncio.TimeoutError, ConnectionRefusedError, OSError):
+            return False
+        except Exception:
             return False

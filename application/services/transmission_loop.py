@@ -91,6 +91,8 @@ class TransmissionLoop:
                 await self._task
             except asyncio.CancelledError:
                 pass
+            except Exception:
+                pass
         self._task = None
         self._writer.close_session()
 
@@ -116,6 +118,12 @@ class TransmissionLoop:
                     self._stats.failed += 1
                 if self._on_log_generated:
                     self._on_log_generated(raw_log, success)
+            except asyncio.CancelledError:
+                raise
+            except OSError:
+                self._stats.failed += 1
+                if self._on_log_generated:
+                    self._on_log_generated("", False)
             except Exception:
                 self._stats.failed += 1
                 if self._on_log_generated:

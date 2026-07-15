@@ -27,6 +27,7 @@ class MainWindow(QMainWindow):
         self.setStyleSheet(FLUENT_STYLESHEET)
         self._persons: list[Person] = [copy.copy(p) for p in PERSONS]
         self._view_model = MainViewModel(self._persons)
+        self._closing: bool = False
         self._build_ui()
         self._connect_signals()
 
@@ -102,11 +103,12 @@ class MainWindow(QMainWindow):
 
     def _on_state_changed(self, state: str) -> None:
         self._tx_control.set_running(state == MainViewModel.STATE_RUNNING)
+        loop = self._view_model._loop
         self._stats_panel.update_stats(
-            person=self._view_model._loop.stats.current_person if self._view_model._loop else "",
-            telegram_type=self._view_model._loop.stats.current_telegram_type if self._view_model._loop else "",
-            total=self._view_model._loop.stats.total if self._view_model._loop else 0,
-            failed=self._view_model._loop.stats.failed if self._view_model._loop else 0,
+            person=loop.stats.current_person if loop else "",
+            telegram_type=loop.stats.current_telegram_type if loop else "",
+            total=loop.stats.total if loop else 0,
+            failed=loop.stats.failed if loop else 0,
             state=state,
         )
         msg_map = {
@@ -126,9 +128,24 @@ class MainWindow(QMainWindow):
         self._view_model.update_persons(persons)
 
     def closeEvent(self, event: QCloseEvent) -> None:
-        if self._view_model._loop:
-            asyncio.ensure_future(self._view_model._loop.stop())
-        event.accept()
+        if self._closing:
+            event.accept()
+            return
+        self._closing = True
+        loop = self._view_model._loop
+        if loop and (loop.is_running or (loop._task and not loop._task.done())):
+            event.ignore()
+            asyncio.ensure_future(self._async_close())
+        else:
+            event.accept()
+
+    async def _async_close(self) -> None:
+        try:
+            await self._view_model._loop.stop()
+        except Exception:
+            pass
+        finally:
+            self.close()
 
     @property
     def control_panel(self) -> ControlPanel:

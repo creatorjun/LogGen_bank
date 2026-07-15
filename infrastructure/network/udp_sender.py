@@ -26,3 +26,5 @@ class UdpSender(LogSenderPort):
             return True
         except OSError:
             return False
+        except Exception:
+            return False
