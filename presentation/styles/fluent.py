@@ -119,7 +119,6 @@ QPushButton#btn_sign {
     background-color: #FFFFFF;
     border: 1px solid #D0D0D0;
     color: #1A1A1A;
-    qproperty-alignment: AlignCenter;
 }
 
 QPushButton#btn_sign:hover {
