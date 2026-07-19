@@ -9,6 +9,7 @@ class AppStatusBar(QStatusBar):
     COLOR_FAILURE: str = "#D13438"
     COLOR_INFO: str = "#0078D4"
     AUTO_CLEAR_MS: int = 5000
+    LABEL_PADDING: str = "padding-left: 8px;"
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
@@ -20,10 +21,10 @@ class AppStatusBar(QStatusBar):
 
     def show_result(self, success: bool, message: str) -> None:
         color = self.COLOR_SUCCESS if success else self.COLOR_FAILURE
-        self._lbl.setStyleSheet(f"color: {color}; font-weight: 600;")
+        self._lbl.setStyleSheet(f"color: {color}; font-weight: 600; {self.LABEL_PADDING}")
         self._lbl.setText(message)
         self._timer.start(self.AUTO_CLEAR_MS)
 
     def show_info(self, message: str) -> None:
-        self._lbl.setStyleSheet(f"color: {self.COLOR_INFO};")
+        self._lbl.setStyleSheet(f"color: {self.COLOR_INFO}; {self.LABEL_PADDING}")
         self._lbl.setText(message)
